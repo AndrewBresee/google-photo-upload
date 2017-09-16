@@ -4,7 +4,6 @@ import { Navbar, Nav, NavItem } from 'react-bootstrap';
 
 export default class Navigation extends React.Component {
   render() {
-    const userObj = JSON.parse(window.sessionStorage.profileObj);
     return (
       <Navbar>
         <Nav>

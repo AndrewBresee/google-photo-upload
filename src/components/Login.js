@@ -7,7 +7,6 @@ export default class Login extends React.Component {
     const storage = window.sessionStorage;
     storage.setItem('tokenObj', JSON.stringify(event.tokenObj));
     storage.setItem('profileObj', JSON.stringify(event.profileObj));
-    console.log('storage now has tokenObj: ', JSON.parse(window.sessionStorage.profileObj))
   }
   failureGoogle(event) {
     console.log('failure because of: ', event)
