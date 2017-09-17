@@ -2,82 +2,113 @@ import React from 'react';
 import GoogleLogin from 'react-google-login';
 import config from '../config';
 
-// https://developers.google.com/api-client-library/javascript/start/start-js
-// https://developers.google.com/api-client-library/javascript/samples/samples#authorizing-and-making-authorized-requests
-
 // https://developers.google.com/picker/docs/
-
-// QUESTION
-// IS the token saved on the window now?
-// Setting visability of signin/signout on token
-// Checking for auth2
+// https://developers.google.com/picker/docs/reference#ViewId
 
 export default class Login extends React.Component {
   constructor(props) {
     super(props);
     // might need to move oauthToken to parent scope
     this.state = {
-      auth2: null,
+      auth2ApiLoaded: null,
       pickerApiLoaded: false,
-      oauthToken: null
+      logedIn: false
     };
   }
+
   componentDidMount () {
-    window.gapi.load('auth2', () => {
+    gapi.load('auth2', () => {
       console.log('auth2 loaded')
+      this.auth2ApiLoaded = true;
     })
-    window.gapi.load('picker', {'callback': this.onPickerApiLoad});
+    gapi.load('picker', () => {
+      console.log('picker loaded')
+      this.pickerApiLoaded = true;
+    })
   }
 
-  onPickerApiLoad() {
-    console.log('onPickerApiLoad loaded')
-    this.pickerApiLoaded = true;
-    this.createPicker();
-  }
+  pickerCallback(data) {
+     let url = 'nothing';
+     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+       let doc = data[google.picker.Response.DOCUMENTS][0];
+       url = doc[google.picker.Document.URL];
+     }
+     // a modal here instead?
+     let message = 'You picked: ' + url;
+     document.getElementById('result').innerHTML = message;
+   }
 
     handleAuthResult(authResult) {
       if (authResult && !authResult.error) {
-        this.oauthToken = authResult.access_token;
-        this.createPicker();
+        localStorage.setItem('GoogleAuth', JSON.stringify(authResult));
+        this.setState({
+          logedIn: true
+        })
       }
     }
 
-    createPicker() {
-      console.log('createPicker clicked')
-      if (this.pickerApiLoaded && this.oauthToken) {
+    uploadPhoto() {
+      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+      if (this.pickerApiLoaded && savedAuth.access_token) {
         let picker = new google.picker.PickerBuilder().
-        addView(google.picker.ViewId.PHOTOS).
-        setOAuthToken(this.oauthToken).
-        setDeveloperKey(developerKey).
-        setCallback(pickerCallback).
+        addView(google.picker.ViewId.PHOTO_UPLOAD).
+        setOAuthToken(savedAuth.access_token).
+        setDeveloperKey(config.UploadAPIKey).
+        setCallback(this.pickerCallback).
         build();
 
-    // set this visability later
-    picker.setVisible(true);
+        picker.setVisible(true);
+      }
     }
-  }
+
+    takePhoto() {
+      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+      if (this.pickerApiLoaded && savedAuth.access_token) {
+        let picker = new google.picker.PickerBuilder().
+        addView(google.picker.ViewId.WEBCAM).
+        setOAuthToken(savedAuth.access_token).
+        setDeveloperKey(config.UploadAPIKey).
+        setCallback(this.pickerCallback).
+        build();
+
+        picker.setVisible(true);
+      }
+    }
+
     handleSignInClick(event) {
-      // might need to authorize with a developer key later...
+      let t = this
       window.gapi.auth2.authorize(
           {
             'client_id': config.ClientID,
             'scope': ['https://www.googleapis.com/auth/photos'],
             'immediate': false
           },
-          this.handleAuthResult);
+          this.handleAuthResult.bind(t));
     }
 
     handleSignOutClick(event) {
-      window.gapi.auth2.getAuthInstance().signOut();
+      localStorage.removeItem('GoogleAuth');
+      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+      this.setState({
+        logedIn: false
+      })
     }
 
   render() {
+    let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+    let logInOrOut = null;
+    if (savedAuth === null) {
+      logInOrOut = <button id="signin-button" onClick={this.handleSignInClick.bind(this)}>Sign In</button>
+    } else {
+      logInOrOut = <button id="signout-button" onClick={this.handleSignOutClick.bind(this)}>Sign Out</button>
+    }
     return (
       <div>
         <h1>Login Page</h1>
-          <button id="signin-button" onClick={this.handleSignInClick.bind(this)}>Sign In</button>
-          <button id="signout-button" onClick={this.handleSignOutClick}>Sign Out</button>
-          <button id="signout-button" onClick={this.makeApiCall}>makeApiCall</button>
+          <div id="result"></div>
+          {logInOrOut}
+          <button id="signout-button" onClick={this.uploadPhoto.bind(this)}>Upload Photo</button>
+          <button id="signout-button" onClick={this.takePhoto.bind(this)}>Take Photo</button>
       </div>
     );
   }
