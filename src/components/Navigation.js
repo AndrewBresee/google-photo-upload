@@ -10,14 +10,11 @@ export default class Navigation extends React.Component {
     this.state = {
       auth2ApiLoaded: null,
       pickerApiLoaded: false,
-      logedIn: this.props.loggedIn,
-      handleSignInClick: this.props.handleSignInClick,
-      handleSignOutClick: this.props.handleSignOutClick
+      logedIn: this.props.loggedIn
     };
   }
 
   render() {
-    console.log('rendering with props: ', this.props)
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
     let logInOrOut = null;
     if (savedAuth === null) {
@@ -41,7 +38,8 @@ export default class Navigation extends React.Component {
           <NavItem eventKey={4}>
             <Link to="upload">Upload</Link>
           </NavItem>
-            {logInOrOut}
+          <div id="g-signin2" data-onsuccess={this.props.onSignIn} data-theme="dark" />
+          <a href="#" onClick={this.props.signOut}>Sign out</a>
         </Nav>
       </Navbar>
     );

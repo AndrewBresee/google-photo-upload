@@ -5,6 +5,8 @@ import config from '../config';
 // https://developers.google.com/picker/docs/
 // https://developers.google.com/picker/docs/reference#ViewId
 
+// https://stackoverflow.com/questions/43617815/how-to-get-google-authentication-to-work-with-reactjs
+
 export default class Upload extends React.Component {
   constructor(props) {
     super(props);
@@ -14,10 +16,6 @@ export default class Upload extends React.Component {
       pickerApiLoaded: false,
       logedIn: this.props.logedIn
     };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    console.log('Props are udated!!!')
   }
 
   pickerCallback(data) {
@@ -35,10 +33,11 @@ export default class Upload extends React.Component {
     uploadPhoto() {
       console.log('upload photo clicked')
       let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-      if (savedAuth.access_token) {
+      console.log('savedAuth: ', savedAuth)
+      if (savedAuth.Zi.access_token) {
         let picker = new google.picker.PickerBuilder().
         addView(google.picker.ViewId.PHOTO_UPLOAD).
-        setOAuthToken(savedAuth.access_token).
+        setOAuthToken(savedAuth.Zi.access_token).
         setDeveloperKey(config.UploadAPIKey).
         setCallback(this.pickerCallback).
         build();
@@ -52,10 +51,10 @@ export default class Upload extends React.Component {
 
     takePhoto() {
       let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-      if (savedAuth.access_token) {
+      if (savedAuth.Zi.access_token) {
         let picker = new google.picker.PickerBuilder().
         addView(google.picker.ViewId.WEBCAM).
-        setOAuthToken(savedAuth.access_token).
+        setOAuthToken(savedAuth.Zi.access_token).
         setDeveloperKey(config.UploadAPIKey).
         setCallback(this.pickerCallback).
         build();
