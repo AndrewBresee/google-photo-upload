@@ -7,6 +7,9 @@ import config from '../config';
 
 // https://stackoverflow.com/questions/43617815/how-to-get-google-authentication-to-work-with-reactjs
 
+// set albumb id
+// https://github.com/AGBrown/DefinitelyTyped-ABContrib/blob/master/google.picker/google.picker.d.ts
+
 export default class Upload extends React.Component {
   constructor(props) {
     super(props);
@@ -20,6 +23,7 @@ export default class Upload extends React.Component {
 
   pickerCallback(data) {
      let url = 'nothing';
+     console.log('data uploaded!: ', data)
      if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
        console.log('data uploaded!: ', data)
        let doc = data[google.picker.Response.DOCUMENTS][0];
@@ -53,6 +57,7 @@ export default class Upload extends React.Component {
       let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
       if (savedAuth.Zi.access_token) {
         let picker = new google.picker.PickerBuilder().
+        setUploadToAlbumId('123456').
         addView(google.picker.ViewId.WEBCAM).
         setOAuthToken(savedAuth.Zi.access_token).
         setDeveloperKey(config.UploadAPIKey).
