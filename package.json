@@ -20,6 +20,7 @@
     "Messanger"
   ],
   "dependencies": {
+    "aws-sdk": "^2.122.0",
     "bootstrap": "^3.3.7",
     "connect-multiparty": "^2.0.0",
     "jquery": "^3.2.1",
