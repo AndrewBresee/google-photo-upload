@@ -6,7 +6,7 @@ import open from 'open';
 import fs from 'fs';
 import configFile from '../src/config'
 
-// http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/s3-example-photo-album.html#s3-example-photo-album-create-album
+//
 
 
 import AWS from 'aws-sdk'
@@ -19,7 +19,6 @@ import multiparty from 'connect-multiparty';
 let multipartyMiddleware = multiparty();
 
 /* eslint-disable no-console */
-
 const port = 3000;
 const app = express();
 const compiler = webpack(config);
@@ -52,13 +51,26 @@ app.post('/testUpload', (req, res) => {
 });
 
 app.get('/getS3Folder', (req, res) => {
-  return s3.getObject(params, (err, data) => {
+  let albumName = req.query.folder + "/"
+  s3.listObjects({Bucket: 'reactphotouploader', Prefix: albumName}, (err, data) => {
+    let t = this
+    let getHtml = (template) => {
+      return template.join('\n');
+    }
     if (err) {
       console.log(err, err.stack)
     } else {
-      console.log(data);
+      console.log('data: ', data)
+      let bucketUrl = "http://bucket.s3.amazonaws.com/reactphotouploader/"
+      let photos = data.Contents.map((photo) => {
+        let photoKey = photo.Key;
+        let photoUrl = bucketUrl + photoKey
+        return photoUrl
+      });
+      res.send(photos);
+      res.end('It worked!')
     }
-  });
+  })
 });
 
 app.get('/*', (req, res) => {

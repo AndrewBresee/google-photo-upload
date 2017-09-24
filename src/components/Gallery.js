@@ -3,40 +3,17 @@ import $ from 'jquery'
 
 export default class Gallery extends React.Component {
   getPicasa() {
-    let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-    let access_token = savedAuth.Zi.access_token
-    let userId = "109317027548384374583"
-    console.log('savedAuth: ', savedAuth)
-    $.ajax({ //gives 204 no content response
-            dataType: "jsonp",
-            url: "https://picasaweb.google.com/data/feed/base/user/" + userId,
-            data: {
-                alt: 'json-in-script',
-            },
-            jsonpCallback: 'jsonpCallback',
-            beforeSend: function(xhr){ //headers
-                xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-                xhr.setRequestHeader('GData-Version', '2');
-            },
-            success: function(data){
-              console.log('data: ', data)
-              var photos = [];
-              $.each(data.feed.entry, function(item){
-                  // TODO: Get the id of the albumb here and use that for uploading later
-                  console.log('item: ', item)
-                  photos.push({
-                      src: this.content.src
-                  });
-              });
-              console.log('GOT stuff!: ', photos)
-            },
-            fail: function(){
-                console.log("fail");
-            }
-        })
-        .done(function(data){
-            console.log(data);
-        });
+    $.ajax({
+      url: "/getS3Folder?folder=bresee",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        console.log('successdata!: ', data)
+      },
+      fail: () => {
+        console.log('fail')
+      }
+      });
   }
   createAlbum() {
     var request = '<?xml version="1.0" encoding="UTF-8"?>' +
