@@ -39,9 +39,21 @@ app.use(multipartyMiddleware);
 app.use(require('webpack-hot-middleware')(compiler));
 
 app.post('/upload', (req, res) => {
-  const fileDetail = req.files.uploadImage;
-  let stream = fs.createReadStream(fileDetail.path)
-  let fileName = encodeURIComponent(fileDetail.name)
+  let fileDetail = req.files;
+  let stream
+  let fileName
+  if (fileDetail.uploadImage !== undefined) {
+    fileDetail = fileDetail.uploadImage
+    stream = fs.createReadStream(fileDetail.path)
+    fileName = encodeURIComponent(fileDetail.name)
+  } else {
+    fileDetail = req.body.uploadImage
+    console.log('fileDetail: ', fileDetail)
+    stream = new Buffer(fileDetail, 'base64');
+    fileName = encodeURI(fileDetail.slice(0,10))
+    // let writeStream = fs.writeFileSync(file, bitmap);
+  }
+
   const folderName = req.body.folder
   const albumPhotosKey = folderName + '/';
 

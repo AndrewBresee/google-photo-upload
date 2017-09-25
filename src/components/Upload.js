@@ -67,6 +67,10 @@ export default class Upload extends React.Component {
       })
     }
 
+    test() {
+      console.log('')
+    }
+
   render() {
     // TODO: Fix the way state is handled here. Loging in/out does not cause a rerender
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
@@ -82,6 +86,7 @@ export default class Upload extends React.Component {
             ref={this.setRef.bind(this)}
             screenshotFormat="file"
             width={350}
+            onUserMedia={this.test.bind(this)}
           />
           <button onClick={this.capture.bind(this)}>Capture photo</button>
         </div>
