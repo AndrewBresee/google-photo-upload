@@ -1,85 +1,94 @@
 import React from 'react';
 import GoogleLogin from 'react-google-login';
 import config from '../config';
+import Webcam from 'react-webcam';
+import $ from 'jquery'
 
-// https://developers.google.com/picker/docs/
-// https://developers.google.com/picker/docs/reference#ViewId
-
-// https://stackoverflow.com/questions/43617815/how-to-get-google-authentication-to-work-with-reactjs
-
-// set albumb id
-// https://github.com/AGBrown/DefinitelyTyped-ABContrib/blob/master/google.picker/google.picker.d.ts
+// might have to create bucket when they Login
+// http://www.joshsgman.com/upload-to-and-get-images-from-amazon-s3-with-node-js/
 
 export default class Upload extends React.Component {
   constructor(props) {
     super(props);
     // might need to move oauthToken to parent scope
     this.state = {
-      auth2ApiLoaded: null,
-      pickerApiLoaded: false,
-      logedIn: this.props.logedIn
+      logedIn: this.props.logedIn,
+      capuredPhoto: null,
+      imagePreviewUrl: null
     };
   }
 
-  pickerCallback(data) {
-     let url = 'nothing';
-     console.log('data uploaded!: ', data)
-     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-       console.log('data uploaded!: ', data)
-       let doc = data[google.picker.Response.DOCUMENTS][0];
-       url = doc[google.picker.Document.URL];
-     }
-     // a modal here instead?
-     let message = 'You picked: ' + url;
-     document.getElementById('result').innerHTML = message;
-   }
-
-    uploadPhoto() {
-      console.log('upload photo clicked')
-      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-      console.log('savedAuth: ', savedAuth)
-      if (savedAuth.Zi.access_token) {
-        let picker = new google.picker.PickerBuilder().
-        addView(google.picker.ViewId.PHOTO_UPLOAD).
-        setOAuthToken(savedAuth.Zi.access_token).
-        setDeveloperKey(config.UploadAPIKey).
-        setCallback(this.pickerCallback).
-        build();
-
-        picker.setVisible(true);
-      } else {
-        console.error('No longer logged in')
-        // redirect
-      }
+    setRef (webcam) {
+      console.log('setref')
+      this.webcam = webcam;
     }
 
-    takePhoto() {
-      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-      if (savedAuth.Zi.access_token) {
-        let picker = new google.picker.PickerBuilder().
-        setUploadToAlbumId('123456').
-        addView(google.picker.ViewId.WEBCAM).
-        setOAuthToken(savedAuth.Zi.access_token).
-        setDeveloperKey(config.UploadAPIKey).
-        setCallback(this.pickerCallback).
-        build();
+    capture() {
+      const imageSrc = this.webcam.getScreenshot();
+      console.log('captured img with value of: ', Date.now())
+      this.setState({
+        capuredPhoto: imageSrc
+      })
+    };
 
-        picker.setVisible(true);
-      } else {
-        console.error('No longer logged in')
-        // redirect
+    selectPhoto(e) {
+      e.preventDefault();
+      let reader = new FileReader();
+      let file = e.target.files[0];
+      reader.onload = (e) => {
+        this.setState({
+          capuredPhoto: file,
+          imagePreviewUrl: reader.result
+        });
       }
+
+      reader.readAsDataURL(file)
+    };
+
+    uploadPhoto() {
+      console.log('uploaded fileName: ', this.state.capuredPhoto)
+      let data = new FormData(this)
+      data.append('uploadImage', this.state.capuredPhoto)
+      data.append('folder', 'bresee')
+      const xhr = new XMLHttpRequest;
+      xhr.open('POST', '/upload', true);
+      $.ajax({
+        type: 'POST',
+        url:'/upload',
+        data: data,
+        processData: false,
+        contentType: false,
+        success: (data) => {
+          console.log('pass with data: ', data)
+        },
+        fail: () => {
+          console.log('fail')
+        }
+      })
+    }
+
+    test() {
+      console.log('')
     }
 
   render() {
     // TODO: Fix the way state is handled here. Loging in/out does not cause a rerender
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
     let logInOrOut = null;
+    let photoPreview = null;
+    let uploadPhotoButton = null;
     if (savedAuth != null) {
       logInOrOut = (
         <div>
-          <button id="signout-button" onClick={this.uploadPhoto.bind(this)}>Upload Photo</button>
-          <button id="signout-button" onClick={this.takePhoto.bind(this)}>Take Photo</button>
+          <Webcam
+            audio={false}
+            height={350}
+            ref={this.setRef.bind(this)}
+            screenshotFormat="file"
+            width={350}
+            onUserMedia={this.test.bind(this)}
+          />
+          <button onClick={this.capture.bind(this)}>Capture photo</button>
         </div>
       )
     } else {
@@ -89,10 +98,17 @@ export default class Upload extends React.Component {
         </div>
       )
     }
+    if (this.state.imagePreviewUrl !== null ) {
+      uploadPhotoButton = <button onClick={this.uploadPhoto.bind(this)}>Upload Photo</button>
+      photoPreview = <img src={this.state.imagePreviewUrl} />
+    }
     return (
       <div>
         <h1>Upload</h1>
+        <input type="file" onChange={this.selectPhoto.bind(this)}/>
         {logInOrOut}
+        {uploadPhotoButton}
+        {photoPreview}
       </div>
     );
   }
