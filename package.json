@@ -1,7 +1,7 @@
 {
-  "name": "google-photo-upload",
+  "name": "S3-photo-upload",
   "version": "1.0.0",
-  "description": "A simple app to upload photos to your google account",
+  "description": "Upload photos to S3",
   "main": "webpack.config.dev.js",
   "scripts": {
     "test": "test",
@@ -13,27 +13,22 @@
     "url": "git+https://github.com/AndrewBresee/google-photo-upload.git"
   },
   "keywords": [
-    "React",
-    "Redux",
-    "Socket",
-    "Chat",
-    "Messanger"
   ],
   "dependencies": {
     "aws-sdk": "^2.122.0",
     "bootstrap": "^3.3.7",
     "connect-multiparty": "^2.0.0",
+    "install": "^0.10.1",
     "jquery": "^3.2.1",
+    "npm": "^5.4.2",
     "react": "^15.3.1",
     "react-bootstrap": "^0.30.10",
     "react-codemirror": "^0.2.6",
     "react-dom": "^15.6.1",
     "react-google-login": "^2.9.3",
     "react-images-upload": "^1.1.1",
-    "react-redux": "^4.4.8",
     "react-router": "^2.8.1",
-    "redux-thunk": "^2.2.0",
-    "s3fs": "^2.5.0"
+    "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
     "babel-cli": "6.8.0",

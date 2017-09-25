@@ -12,8 +12,6 @@ AWS.config.update({
     "secretAccessKey": configFile.AWSSecretKey
 });
 
-
-
 const params = {Bucket: 'reactphotouploader', Key: 'bresee/' };
 let s3 = new AWS.S3({
   apiVersion: '2006-03-01',
@@ -62,7 +60,6 @@ app.post('/upload', (req, res) => {
 });
 
 app.get('/getS3Folder', (req, res) => {
-  console.log('server hit')
   const albumName = req.query.folder + "/"
   return s3.listObjects({Prefix: albumName}, (err, data) => {
     console.log('data on the server: ', data)
@@ -73,9 +70,7 @@ app.get('/getS3Folder', (req, res) => {
       console.log(err, err.stack)
     } else {
       const bucketUrl = "http://reactphotouploader.s3.amazonaws.com/"
-      // We skip the first element because it is the directory
-      // that the pictures exist in
-      let photos = data.Contents.slice(1).map((photo, i) => {
+      let photos = data.Contents.map((photo, i) => {
         const photoKey = photo.Key;
         const photoUrl = bucketUrl + photoKey
         return photoUrl

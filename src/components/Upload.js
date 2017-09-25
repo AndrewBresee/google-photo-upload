@@ -13,53 +13,63 @@ export default class Upload extends React.Component {
     this.state = {
       logedIn: this.props.logedIn,
       capuredPhoto: null,
-      imagePreviewUrl: null
+      imagePreviewUrl: null,
+      uploadMessage: null
     };
   }
 
-    selectPhoto(e) {
-      e.preventDefault();
-      let reader = new FileReader();
-      let file = e.target.files[0];
-      reader.onload = (e) => {
-        this.setState({
-          capuredPhoto: file,
-          imagePreviewUrl: reader.result
-        });
-      }
-
-      reader.readAsDataURL(file)
-    };
-
-    uploadPhoto() {
-      console.log('uploaded fileName: ', this.state.capuredPhoto)
-      let data = new FormData(this)
-      data.append('uploadImage', this.state.capuredPhoto)
-      data.append('folder', 'bresee')
-      const xhr = new XMLHttpRequest;
-      xhr.open('POST', '/upload', true);
-      $.ajax({
-        type: 'POST',
-        url:'/upload',
-        data: data,
-        processData: false,
-        contentType: false,
-        success: (data) => {
-          console.log('pass with data: ', data)
-        },
-        fail: () => {
-          console.log('fail')
-        }
-      })
+  selectPhoto(e) {
+    e.preventDefault();
+    let reader = new FileReader();
+    let file = e.target.files[0];
+    reader.onload = (e) => {
+      console.log('res')
+      this.setState({
+        capuredPhoto: file,
+        imagePreviewUrl: reader.result,
+        uploadMessage: null
+      });
     }
+    reader.readAsDataURL(file)
+  };
+
+  uploadPhoto() {
+    const t = this
+    const savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+    let folderName = savedAuth.w3.U3
+    folderName = folderName.replace(".","")
+    folderName = folderName.replace("@","")
+    folderName = folderName.replace(".com","")
+    let data = new FormData(this)
+    data.append('uploadImage', this.state.capuredPhoto)
+    data.append('folder', folderName)
+    const xhr = new XMLHttpRequest;
+    xhr.open('POST', '/upload', true);
+    $.ajax({
+      type: 'POST',
+      url:'/upload',
+      data: data,
+      processData: false,
+      contentType: false,
+      success: (data) => {
+        console.log('pass with data: ', data)
+        t.setState({
+          imagePreviewUrl: null,
+          uploadMessage: "Upload Complete!"
+        })
+      },
+      fail: () => {
+        console.log('fail')
+      }
+    })
+  }
 
   render() {
-    // TODO: Fix the way state is handled here. Loging in/out does not cause a rerender
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
     let logInOrOut = null;
     let photoPreview = null;
     let uploadPhotoButton = null;
-    if (savedAuth != null) {
+    if (this.props.logedIn === true) {
       logInOrOut = (
         <div>
           <input type="file" onChange={this.selectPhoto.bind(this)}/>
@@ -76,12 +86,14 @@ export default class Upload extends React.Component {
       uploadPhotoButton = <button onClick={this.uploadPhoto.bind(this)}>Upload Photo</button>
       photoPreview = <img src={this.state.imagePreviewUrl} />
     }
+    
     return (
       <div>
         <h1>Upload</h1>
         {logInOrOut}
         {uploadPhotoButton}
         {photoPreview}
+        {this.state.uploadMessage}
       </div>
     );
   }

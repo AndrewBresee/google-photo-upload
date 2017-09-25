@@ -15,7 +15,6 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
-    console.log('componentDidMount')
     gapi.signin2.render("g-signin2", {
       'scope': "https://www.googleapis.com/auth/userinfo.email  https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/photos",
       'width': 200,
@@ -25,13 +24,8 @@ export default class App extends React.Component {
       'onsuccess': this. onSignIn
     });
     gapi.load('auth2', function() {
-      console.log('auth2 loaded')
       gapi.auth2.init();
     });
-    gapi.load('picker', () => {
-      console.log('picker loaded')
-      this.pickerApiLoaded = true;
-    })
   }
 
   handleSignOutClick(event) {
@@ -43,15 +37,10 @@ export default class App extends React.Component {
   }
 
   onSignIn(googleUser) {
-    console.log('onSignIn this is: ', this)
-    var profile = googleUser.getBasicProfile();
-    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-    console.log('Name: ' + profile.getName());
-    console.log('Image URL: ' + profile.getImageUrl());
-    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    const profile = googleUser.getBasicProfile();
     localStorage.setItem('GoogleAuth', JSON.stringify(googleUser));
     this.setState({
-      logedIn: false
+      logedIn: true
     });
   }
 
@@ -60,6 +49,9 @@ export default class App extends React.Component {
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
       console.log('User signed out.');
+    });
+    this.setState({
+      logedIn: false
     });
   }
 
@@ -73,7 +65,7 @@ export default class App extends React.Component {
         <Navigation
           onSignIn={this.onSignIn.bind(this)}
           signOut={this.signOut.bind(this)}
-          loggedIn={this.state.loggedIn}/>
+          logedIn={this.state.logedIn}/>
         {childWithProp}
       </div>
     );

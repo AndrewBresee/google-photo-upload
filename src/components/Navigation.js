@@ -6,7 +6,6 @@ import { Navbar, Nav, NavItem } from 'react-bootstrap';
 export default class Navigation extends React.Component {
   constructor(props) {
     super(props);
-    // might need to move oauthToken to parent scope
     this.state = {
       auth2ApiLoaded: null,
       pickerApiLoaded: false,
@@ -16,11 +15,19 @@ export default class Navigation extends React.Component {
 
   render() {
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
+    let profileElement
+    if (savedAuth !== null) {
+      profileElement = (
+        <div>
+          <div>{savedAuth.w3.ig} profile</div>
+        </div>
+      )
+    }
     let logInOrOut = null;
-    if (savedAuth === null) {
-      logInOrOut = <button id="signin-button" onClick={this.props.handleSignInClick}>Sign In</button>
+    if (this.state.logedIn === true) {
+      // change nav bar to reflect login state
     } else {
-      logInOrOut = <button id="signout-button" onClick={this.props.handleSignOutClick}>Sign Out</button>
+      // change nav bar to reflect login state
     }
 
     return (
@@ -40,6 +47,7 @@ export default class Navigation extends React.Component {
           </NavItem>
           <div id="g-signin2" data-onsuccess={this.props.onSignIn} data-theme="dark" />
           <a href="#" onClick={this.props.signOut}>Sign out</a>
+          {profileElement}
         </Nav>
       </Navbar>
     );
