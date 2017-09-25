@@ -4,7 +4,6 @@ import $ from 'jquery'
 export default class Gallery extends React.Component {
   constructor(props) {
     super(props);
-    // might need to move oauthToken to parent scope
     this.state = {
       photos: [],
       logedIn: this.props.logedIn

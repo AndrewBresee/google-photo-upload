@@ -29,7 +29,6 @@ export default class App extends React.Component {
   }
 
   handleSignOutClick(event) {
-    // TODO: Fix logout flow. Might need to usegapi.auth2.getAuthInstance().disconnect();
     localStorage.removeItem('GoogleAuth');
     this.setState({
       logedIn: false
