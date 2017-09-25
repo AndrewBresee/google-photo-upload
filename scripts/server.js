@@ -4,14 +4,19 @@ import path from 'path';
 import config from '../webpack.config.dev';
 import open from 'open';
 import fs from 'fs';
-import configFile from '../src/config'
+import configFile from '../src/config';
+import AWS from 'aws-sdk';
 
-//
+AWS.config.update({
+    "accessKeyId": configFile.AWSAccessKeyID,
+    "secretAccessKey": configFile.AWSSecretKey
+});
 
-
-import AWS from 'aws-sdk'
-let s3 = new AWS.S3();
-let params = {Bucket: 'reactphotouploader', Key: 'bresee/' }
+const params = {Bucket: 'reactphotouploader', Key: 'bresee/', EncodingType: "url" };
+let s3 = new AWS.S3({
+  apiVersion: '2006-03-01',
+  params: params
+});
 
 import multiparty from 'connect-multiparty';
 
@@ -31,44 +36,57 @@ app.use(require('webpack-dev-middleware')(compiler, {
 app.use(multipartyMiddleware);
 app.use(require('webpack-hot-middleware')(compiler));
 
-app.post('/testUpload', (req, res) => {
-  let file = req.files.image;
-  let folderName = req.body.folder
-  let fileName = file.name;
-  let albumPhotosKey = encodeURIComponent(folderName) + '//';
+app.post('/upload', (req, res) => {
+  const file = req.body.uploadImage;
+  let fileName
+  if (file.value === undefined) {
+    fileName = Date.now() + '.png'
+  } else {
+    fileName = file.value
+  }
+  console.log('hit the server with fileName: ', fileName)
+  const folderName = req.body.folder
+  const albumPhotosKey = folderName + '/';
 
-  let photoKey = albumPhotosKey + fileName;
+  let photoKey = albumPhotosKey + fileName
+  console.log('photoKey: ', folderName)
+  console.log('albumPhotosKey: ', albumPhotosKey)
   s3.upload({
     Key: photoKey,
+    Bucket: 'reactphotouploader',
     Body: file,
     ACL: 'public-read'
   }, function(err, data) {
     if (err) {
       console.log('There was an error uploading your photo: ', err.message);
+      res.status(400).send();
+    } else {
+      res.status(200).send(data);
     }
-    console.log('Successfully uploaded photo.');
   });
 });
 
 app.get('/getS3Folder', (req, res) => {
-  let albumName = req.query.folder + "/"
-  s3.listObjects({Bucket: 'reactphotouploader', Prefix: albumName}, (err, data) => {
-    let t = this
+  console.log('server hit')
+  const albumName = req.query.folder + "/"
+  return s3.listObjects({Prefix: albumName}, (err, data) => {
+    console.log('data on the server: ', data)
     let getHtml = (template) => {
       return template.join('\n');
     }
     if (err) {
       console.log(err, err.stack)
     } else {
-      console.log('data: ', data)
-      let bucketUrl = "http://bucket.s3.amazonaws.com/reactphotouploader/"
-      let photos = data.Contents.map((photo) => {
-        let photoKey = photo.Key;
-        let photoUrl = bucketUrl + photoKey
+      const bucketUrl = "http://reactphotouploader.s3.amazonaws.com/"
+      // We skip the first element because it is the directory
+      // that the pictures exist in
+      let photos = data.Contents.slice(1).map((photo, i) => {
+        const photoKey = photo.Key;
+        const photoUrl = bucketUrl + photoKey
         return photoUrl
       });
-      res.send(photos);
-      res.end('It worked!')
+      console.log('about to send data: ', photos)
+      res.status(200).send(photos);
     }
   })
 });
