@@ -1,7 +1,6 @@
 import React from 'react';
 import GoogleLogin from 'react-google-login';
 import config from '../config';
-import Webcam from 'react-webcam';
 import $ from 'jquery'
 
 // might have to create bucket when they Login
@@ -17,19 +16,6 @@ export default class Upload extends React.Component {
       imagePreviewUrl: null
     };
   }
-
-    setRef (webcam) {
-      console.log('setref')
-      this.webcam = webcam;
-    }
-
-    capture() {
-      const imageSrc = this.webcam.getScreenshot();
-      console.log('captured img with value of: ', Date.now())
-      this.setState({
-        capuredPhoto: imageSrc
-      })
-    };
 
     selectPhoto(e) {
       e.preventDefault();
@@ -76,20 +62,13 @@ export default class Upload extends React.Component {
     if (savedAuth != null) {
       logInOrOut = (
         <div>
-          <Webcam
-            audio={false}
-            height={350}
-            ref={this.setRef.bind(this)}
-            screenshotFormat="file"
-            width={350}
-          />
-          <button onClick={this.capture.bind(this)}>Capture photo</button>
+          <input type="file" onChange={this.selectPhoto.bind(this)}/>
         </div>
       )
     } else {
       logInOrOut = (
         <div>
-          You are not logged in. Login to upload or take photos
+          You are not logged in. Login to upload photos
         </div>
       )
     }
@@ -100,7 +79,6 @@ export default class Upload extends React.Component {
     return (
       <div>
         <h1>Upload</h1>
-        <input type="file" onChange={this.selectPhoto.bind(this)}/>
         {logInOrOut}
         {uploadPhotoButton}
         {photoPreview}
