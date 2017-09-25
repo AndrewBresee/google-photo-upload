@@ -12,7 +12,9 @@ AWS.config.update({
     "secretAccessKey": configFile.AWSSecretKey
 });
 
-const params = {Bucket: 'reactphotouploader', Key: 'bresee/', EncodingType: "url" };
+
+
+const params = {Bucket: 'reactphotouploader', Key: 'bresee/' };
 let s3 = new AWS.S3({
   apiVersion: '2006-03-01',
   params: params
@@ -37,24 +39,17 @@ app.use(multipartyMiddleware);
 app.use(require('webpack-hot-middleware')(compiler));
 
 app.post('/upload', (req, res) => {
-  const file = req.body.uploadImage;
-  let fileName
-  if (file.value === undefined) {
-    fileName = Date.now() + '.png'
-  } else {
-    fileName = file.value
-  }
-  console.log('hit the server with fileName: ', fileName)
+  const fileDetail = req.files.uploadImage;
+  let stream = fs.createReadStream(fileDetail.path)
+  let fileName = encodeURIComponent(fileDetail.name)
   const folderName = req.body.folder
   const albumPhotosKey = folderName + '/';
 
   let photoKey = albumPhotosKey + fileName
-  console.log('photoKey: ', folderName)
-  console.log('albumPhotosKey: ', albumPhotosKey)
   s3.upload({
     Key: photoKey,
     Bucket: 'reactphotouploader',
-    Body: file,
+    Body: stream,
     ACL: 'public-read'
   }, function(err, data) {
     if (err) {

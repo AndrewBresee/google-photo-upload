@@ -4,38 +4,23 @@ import config from '../config';
 import Webcam from 'react-webcam';
 import $ from 'jquery'
 
+// might have to create bucket when they Login
+// http://www.joshsgman.com/upload-to-and-get-images-from-amazon-s3-with-node-js/
+
 export default class Upload extends React.Component {
   constructor(props) {
     super(props);
     // might need to move oauthToken to parent scope
     this.state = {
       logedIn: this.props.logedIn,
-      capuredPhoto: null
+      capuredPhoto: null,
+      imagePreviewUrl: null
     };
   }
 
     setRef (webcam) {
       console.log('setref')
       this.webcam = webcam;
-    }
-
-    takePhoto() {
-      console.log('trying to take photo')
-      let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-      if (savedAuth.Zi.access_token) {
-        let picker = new google.picker.PickerBuilder().
-        setUploadToAlbumId('123456').
-        addView(google.picker.ViewId.WEBCAM).
-        setOAuthToken(savedAuth.Zi.access_token).
-        setDeveloperKey(config.UploadAPIKey).
-        setCallback(this.pickerCallback).
-        build();
-
-        picker.setVisible(true);
-      } else {
-        console.error('No longer logged in')
-        // redirect
-      }
     }
 
     capture() {
@@ -47,14 +32,21 @@ export default class Upload extends React.Component {
     };
 
     selectPhoto(e) {
-      console.log('e.originalEvent.srcElement.files[i];: ', e.target.files[0])
-      this.setState({
-        capuredPhoto: e.target.files[0]
-      })
+      e.preventDefault();
+      let reader = new FileReader();
+      let file = e.target.files[0];
+      reader.onload = (e) => {
+        this.setState({
+          capuredPhoto: file,
+          imagePreviewUrl: reader.result
+        });
+      }
+
+      reader.readAsDataURL(file)
     };
 
     uploadPhoto() {
-      console.log('uploaded fileName: ', this.state.capuredPhoto.value)
+      console.log('uploaded fileName: ', this.state.capuredPhoto)
       let data = new FormData(this)
       data.append('uploadImage', this.state.capuredPhoto)
       data.append('folder', 'bresee')
@@ -88,7 +80,7 @@ export default class Upload extends React.Component {
             audio={false}
             height={350}
             ref={this.setRef.bind(this)}
-            screenshotFormat="image/jpeg"
+            screenshotFormat="file"
             width={350}
           />
           <button onClick={this.capture.bind(this)}>Capture photo</button>
@@ -101,9 +93,9 @@ export default class Upload extends React.Component {
         </div>
       )
     }
-    if (this.state.capuredPhoto !== null) {
+    if (this.state.imagePreviewUrl !== null ) {
       uploadPhotoButton = <button onClick={this.uploadPhoto.bind(this)}>Upload Photo</button>
-      photoPreview = <img src={this.state.capuredPhoto} />
+      photoPreview = <img src={this.state.imagePreviewUrl} />
     }
     return (
       <div>
