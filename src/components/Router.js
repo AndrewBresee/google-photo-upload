@@ -8,10 +8,6 @@ import Profile from './Profile';
 import Gallery from './Gallery';
 import Upload from './Upload';
 
-// https://www.youtube.com/watch?v=1w-oQ-i1XB8&t=145s
-// https://stackoverflow.com/questions/34977898/need-oauth-2-client-implementation-for-react-router
-// https://medium.com/the-many/adding-login-and-authentication-sections-to-your-react-or-react-native-app-7767fd251bd1
-
 
 const Root = () => (
   <Router history={browserHistory}>
