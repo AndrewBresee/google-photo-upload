@@ -41,7 +41,7 @@ export default class Gallery extends React.Component {
     let photos = this.state.photos.map((item, i) => {
       return (
         <span key={i}>
-          <img style={{width:"128px", height:"128px", padding: "1%"}} src={item}/>
+          <img style={{width:"25%", height:"auto", padding: "1%"}} src={item}/>
         </span>
       )
     })

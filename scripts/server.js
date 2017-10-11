@@ -51,7 +51,7 @@ app.post('/upload', (req, res) => {
     ACL: 'public-read'
   }, function(err, data) {
     if (err) {
-      console.log('There was an error uploading your photo: ', err.message);
+      console.error('There was an error uploading your photo: ', err.message);
       res.status(400).send();
     } else {
       res.status(200).send(data);
@@ -62,12 +62,11 @@ app.post('/upload', (req, res) => {
 app.get('/getS3Folder', (req, res) => {
   const albumName = req.query.folder + "/"
   return s3.listObjects({Prefix: albumName}, (err, data) => {
-    console.log('data on the server: ', data)
     let getHtml = (template) => {
       return template.join('\n');
     }
     if (err) {
-      console.log(err, err.stack)
+      console.error(err, err.stack)
     } else {
       const bucketUrl = "http://reactphotouploader.s3.amazonaws.com/"
       let photos = data.Contents.map((photo, i) => {
@@ -75,7 +74,6 @@ app.get('/getS3Folder', (req, res) => {
         const photoUrl = bucketUrl + photoKey
         return photoUrl
       });
-      console.log('about to send data: ', photos)
       res.status(200).send(photos);
     }
   })
