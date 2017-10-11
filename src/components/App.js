@@ -8,7 +8,7 @@ export default class App extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      logedIn: false
+      loggedIn: false
     };
     this.onSignIn = this.onSignIn.bind(this);
     this.handleSignOutClick = this.handleSignOutClick.bind(this);
@@ -31,7 +31,7 @@ export default class App extends React.Component {
   handleSignOutClick(event) {
     localStorage.removeItem('GoogleAuth');
     this.setState({
-      logedIn: false
+      loggedIn: false
     });
   }
 
@@ -39,7 +39,7 @@ export default class App extends React.Component {
     const profile = googleUser.getBasicProfile();
     localStorage.setItem('GoogleAuth', JSON.stringify(googleUser));
     this.setState({
-      logedIn: true
+      loggedIn: true
     });
   }
 
@@ -50,13 +50,13 @@ export default class App extends React.Component {
       console.log('User signed out.');
     });
     this.setState({
-      logedIn: false
+      loggedIn: false
     });
   }
 
   render() {
     const childWithProp = React.Children.map(this.props.children, (child) => {
-        return React.cloneElement(child, {logedIn: this.state.logedIn});
+        return React.cloneElement(child, {loggedIn: this.state.loggedIn});
     });
     return (
       <div>
@@ -64,7 +64,7 @@ export default class App extends React.Component {
         <Navigation
           onSignIn={this.onSignIn.bind(this)}
           signOut={this.signOut.bind(this)}
-          logedIn={this.state.logedIn}/>
+          loggedIn={this.state.loggedIn}/>
         {childWithProp}
       </div>
     );

@@ -15,21 +15,17 @@ export default class Navigation extends React.Component {
 
   render() {
     let savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
-    let profileElement
+    let profileElement = null
     if (savedAuth !== null) {
       profileElement = (
         <div>
           <div>{savedAuth.w3.ig} profile</div>
         </div>
       )
-    }
-    let logInOrOut = null;
-    if (this.state.logedIn === true) {
-      // change nav bar to reflect login state
     } else {
-      // change nav bar to reflect login state
+      profileElement = null
     }
-
+  
     return (
       <Navbar>
         <Nav>
