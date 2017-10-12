@@ -22,7 +22,7 @@ export default class Upload extends React.Component {
   selectPhoto(e) {
     e.preventDefault();
     let reader = new FileReader();
-    const acceptableFileTypes = ['jpg','gif','bmp', 'png']
+    const acceptableFileTypes = ['jpg','gif','bmp','png']
     const file = e.target.files[0];
     const fileName = e.target.files[0].name;
     const fileNameParts = fileName.split('.')
