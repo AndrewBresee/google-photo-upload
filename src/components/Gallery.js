@@ -11,11 +11,13 @@ export default class Gallery extends React.Component {
   }
 
   getPhotos() {
+    console.log('clicked GETPHOTOS')
     const savedAuth = JSON.parse(localStorage.getItem('GoogleAuth'));
     let folderName = savedAuth.w3.U3
     folderName = folderName.replace(".","")
     folderName = folderName.replace("@","")
     folderName = folderName.replace(".com","")
+    console.log('folderName: ', folderName)
     const t = this;
     $.ajax({
       type: "GET",

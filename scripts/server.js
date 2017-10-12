@@ -25,7 +25,7 @@ let multipartyMiddleware = multiparty();
 
 /* eslint-disable no-console */
 const port = 3000;
-const app = express();
+let app = express();
 const compiler = webpack(config);
 
 app.use(require('webpack-dev-middleware')(compiler, {
@@ -37,6 +37,7 @@ app.use(multipartyMiddleware);
 app.use(require('webpack-hot-middleware')(compiler));
 
 app.post('/upload', (req, res) => {
+  console.log('hit this post route')
   const fileDetail = req.files.uploadImage;
   let stream = fs.createReadStream(fileDetail.path)
   let fileName = encodeURIComponent(fileDetail.name)
@@ -57,6 +58,10 @@ app.post('/upload', (req, res) => {
       res.status(200).send(data);
     }
   });
+});
+
+app.get('/badRouteTest', (req, res) => {
+  res.status(400).end();
 });
 
 app.get('/getS3Folder', (req, res) => {
@@ -91,3 +96,5 @@ app.listen(port, (err) => {
     open(`http://localhost:${port}`);
   }
 });
+
+module.exports = app;
